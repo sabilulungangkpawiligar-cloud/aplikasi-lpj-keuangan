@@ -8,7 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Library untuk cetak PDF -->
+    <!-- Library untuk Cetak PDF (html2pdf + Dependencies) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
@@ -78,7 +80,7 @@
                     
                     <!-- Section Selector & PDF Button -->
                     <div class="w-full sm:w-auto flex flex-wrap items-center gap-3">
-                        <button onclick="generatePDFGabungan()" class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+                        <button id="btn-cetak-pdf" type="button" onclick="generatePDFGabungan()" class="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2 cursor-pointer">
                             <i class="fas fa-file-pdf"></i>
                             <span>Cetak PDF Gabungan</span>
                         </button>
@@ -320,7 +322,7 @@
 
         function formatRupiah(number) {
             if (number === 0) return 'Rp 0';
-            if (!number) return '';
+            if (!number) return 'Rp 0';
             let isNegative = number < 0;
             let absNumber = Math.abs(number);
             let formatted = new Intl.NumberFormat('id-ID').format(absNumber);
@@ -365,13 +367,11 @@
             
             document.getElementById('trans-tanggal').valueAsDate = new Date();
 
-            // Load data awal via API fetch
             fetch(SCRIPT_URL + "?action=getInitialData")
                 .then(res => res.json())
                 .then(dataDariSheets => {
                     if (dataDariSheets) {
                         appData = dataDariSheets;
-                        console.log("Data berhasil dimuat dari Google Sheets!");
                         if (currentState.activeSeksi) {
                             switchTab(currentState.activeTab);
                         }
@@ -699,7 +699,11 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
 
-            html2pdf().set(opt).from(element).save();
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save();
+            } else {
+                alert('Library pencetak PDF sedang dimuat, silakan tunggu sebentar dan coba lagi.');
+            }
         }
    <script>
     // MASUKKAN URL WEB APP EXEC KAMU DI SINI
