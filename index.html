@@ -635,7 +635,111 @@
              rekapSaldo.classList.remove('text-red-600');
         }
     }
-             
+
+     function generatePDFGabungan() {
+            let totalAnggaranSemua = 0;
+            let totalPemasukanSemua = 0;
+            let totalPengeluaranSemua = 0;
+
+            let barisTabelHTML = '';
+
+            DAFTAR_SEKSI.forEach((seksi, idx) => {
+                let anggaran = appData[seksi]?.anggaran || 0;
+                let masuk = 0;
+                let keluar = 0;
+
+                (appData[seksi]?.transaksi || []).forEach(trx => {
+                    if (trx.jenis === 'pemasukan') masuk += trx.nominal;
+                    if (trx.jenis === 'pengeluaran') keluar += trx.nominal;
+                });
+
+                let saldo = masuk - keluar;
+
+                totalAnggaranSemua += anggaran;
+                totalPemasukanSemua += masuk;
+                totalPengeluaranSemua += keluar;
+
+                barisTabelHTML += `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 8px; text-align: center;">${idx + 1}</td>
+                        <td style="padding: 8px; font-weight: 500;">${seksi}</td>
+                        <td style="padding: 8px; text-align: right;">${formatRupiah(anggaran)}</td>
+                        <td style="padding: 8px; text-align: right; color: #16a34a;">${formatRupiah(masuk)}</td>
+                        <td style="padding: 8px; text-align: right; color: #dc2626;">${formatRupiah(keluar)}</td>
+                        <td style="padding: 8px; text-align: right; font-weight: bold; color: ${saldo < 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(saldo)}</td>
+                    </tr>
+                `;
+            });
+
+            let totalSaldoSemua = totalPemasukanSemua - totalPengeluaranSemua;
+            let tglCetak = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            const element = document.createElement('div');
+            element.style.padding = '20px';
+            element.style.fontFamily = 'sans-serif';
+            element.style.color = '#1f2937';
+
+            element.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
+                    <h2 style="margin: 0; font-size: 20px; text-transform: uppercase; color: #1e3a8a;">Laporan Pertanggungjawaban (LPJ) Keuangan</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Rekapitulasi Gabungan Seluruh Seksi / Komisi Kepanitiaan</p>
+                    <p style="margin: 2px 0 0 0; font-size: 11px; color: #6b7280;">Dicetak pada: ${tglCetak}</p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                    <thead>
+                        <tr style="background-color: #2563eb; color: white;">
+                            <th style="padding: 8px; text-align: center;">No</th>
+                            <th style="padding: 8px; text-align: left;">Nama Seksi / Komisi</th>
+                            <th style="padding: 8px; text-align: right;">Anggaran</th>
+                            <th style="padding: 8px; text-align: right;">Real. Pemasukan</th>
+                            <th style="padding: 8px; text-align: right;">Real. Pengeluaran</th>
+                            <th style="padding: 8px; text-align: right;">Sisa Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${barisTabelHTML}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 2px solid #1f2937;">
+                            <td colspan="2" style="padding: 10px; text-align: center;">TOTAL KESELURUHAN</td>
+                            <td style="padding: 10px; text-align: right;">${formatRupiah(totalAnggaranSemua)}</td>
+                            <td style="padding: 10px; text-align: right; color: #16a34a;">${formatRupiah(totalPemasukanSemua)}</td>
+                            <td style="padding: 10px; text-align: right; color: #dc2626;">${formatRupiah(totalPengeluaranSemua)}</td>
+                            <td style="padding: 10px; text-align: right; color: ${totalSaldoSemua < 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(totalSaldoSemua)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 12px; text-align: center;">
+                    <div style="width: 40%;">
+                        <p>Mengetahui,<br><b>Ketua Panitia</b></p>
+                        <br><br><br>
+                        <p>( _______________________ )</p>
+                    </div>
+                    <div style="width: 40%;">
+                        <p>Dibuat oleh,<br><b>Bendahara Panitia</b></p>
+                        <br><br><br>
+                        <p>( _______________________ )</p>
+                    </div>
+                </div>
+            `;
+
+            const opt = {
+                margin:       10,
+                filename:     `LPJ_Gabungan_Kepanitiaan_${new Date().toISOString().split('T')[0]}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save();
+            } else {
+                alert('Library pencetak PDF sedang dimuat, silakan tunggu sebentar dan coba lagi.');
+            }
+        }
+       
     function exportExcel() {
         const seksi = currentState.activeSeksi;
         if (!seksi) return;
