@@ -333,9 +333,12 @@
         inputElement.value = new Intl.NumberFormat('id-ID').format(parseInt(val, 10));
     }
 
-    function generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
+   function generateId() {
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0].replace(/-/g, ''); // yyyymmdd
+    const randomNum = Math.floor(100 + Math.random() * 900); // 3 angka acak
+    return `TRX-${dateStr}-${randomNum}`;
+}
 
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('current-year').textContent = new Date().getFullYear();
