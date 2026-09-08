@@ -285,348 +285,359 @@
     </div>
 
     <script>
-        const DAFTAR_SEKSI = [
-            "Seksi Acara", 
-            "Seksi Dekorasi dan Perlengkapan", 
-            "Seksi Publikasi dan Dokumentasi", 
-            "SMKA", 
-            "Seksi Konsumsi", 
-            "Seksi Keamanan", 
-            "Sekretariat", 
-            "Seksi Dana Usaha"
-        ];
+    const DAFTAR_SEKSI = [
+        "Seksi Acara", 
+        "Seksi Dekorasi dan Perlengkapan", 
+        "Seksi Publikasi dan Dokumentasi", 
+        "SMKA", 
+        "Seksi Konsumsi", 
+        "Seksi Keamanan", 
+        "Sekretariat", 
+        "Seksi Dana Usaha"
+    ];
 
-        let appData = {};
-        let currentState = {
-            activeSeksi: null,
-            activeTab: 'anggaran'
+    let appData = {};
+    let currentState = {
+        activeSeksi: null,
+        activeTab: 'anggaran'
+    };
+
+    DAFTAR_SEKSI.forEach(seksi => {
+        appData[seksi] = {
+            anggaran: 0,
+            transaksi: []
         };
+    });
 
-        function initData() {
-            const savedData = localStorage.getItem('lpj_app_data');
-            if (savedData) {
-                appData = JSON.parse(savedData);
+    function formatRupiah(number) {
+        if (number === 0) return 'Rp 0';
+        if (!number) return '';
+        let isNegative = number < 0;
+        let absNumber = Math.abs(number);
+        let formatted = new Intl.NumberFormat('id-ID').format(absNumber);
+        return isNegative ? `-Rp ${formatted}` : `Rp ${formatted}`;
+    }
+
+    function unformatRupiah(rupiahString) {
+        if (!rupiahString) return 0;
+        let cleanString = rupiahString.replace(/[^,\d]/g, '');
+        return parseInt(cleanString, 10) || 0;
+    }
+
+    function formatInputRupiah(inputElement) {
+        let val = inputElement.value.replace(/[^,\d]/g, '');
+        if (val === '') {
+            inputElement.value = '';
+            return;
+        }
+        inputElement.value = new Intl.NumberFormat('id-ID').format(parseInt(val, 10));
+    }
+
+    function generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID', options);
+        
+        const selector = document.getElementById('seksi-selector');
+        DAFTAR_SEKSI.forEach(seksi => {
+            let option = document.createElement('option');
+            option.value = seksi;
+            option.textContent = seksi;
+            selector.appendChild(option);
+        });
+        
+        document.getElementById('trans-tanggal').valueAsDate = new Date();
+
+        // Ambil data awal dari Google Sheets
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run.withSuccessHandler((dataDariSheets) => {
+                if (dataDariSheets) {
+                    appData = dataDariSheets; 
+                    console.log("Data berhasil dimuat dari Google Sheets!");
+                    if (currentState.activeSeksi) {
+                        switchTab(currentState.activeTab);
+                    }
+                }
+            }).getInitialData();
+        }
+    });
+
+    function changeSeksi(seksiName) {
+        if (!seksiName) return;
+        currentState.activeSeksi = seksiName;
+        
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('dashboard-content').classList.remove('hidden');
+        document.getElementById('dashboard-content').classList.add('flex');
+        document.getElementById('active-seksi-title').textContent = seksiName;
+        switchTab('anggaran');
+    }
+
+    function switchTab(tabName) {
+        currentState.activeTab = tabName;
+        
+        const tabs = ['anggaran', 'transaksi', 'laporan'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`tab-btn-${t}`);
+            if (t === tabName) {
+                btn.classList.remove('tab-inactive');
+                btn.classList.add('tab-active');
+                btn.style.backgroundColor = '#eff6ff'; 
             } else {
-                DAFTAR_SEKSI.forEach(seksi => {
-                    appData[seksi] = {
-                        anggaran: 0,
-                        transaksi: []
-                    };
-                });
-                saveToStorage();
+                btn.classList.add('tab-inactive');
+                btn.classList.remove('tab-active');
+                btn.style.backgroundColor = 'transparent';
             }
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('lpj_app_data', JSON.stringify(appData));
-        }
-
-        function formatRupiah(number) {
-            if (number === 0) return 'Rp 0';
-            if (!number) return '';
-            let isNegative = number < 0;
-            let absNumber = Math.abs(number);
-            let formatted = new Intl.NumberFormat('id-ID').format(absNumber);
-            return isNegative ? `-Rp ${formatted}` : `Rp ${formatted}`;
-        }
-
-        function unformatRupiah(rupiahString) {
-            if (!rupiahString) return 0;
-            let cleanString = rupiahString.replace(/[^,\d]/g, '');
-            return parseInt(cleanString, 10) || 0;
-        }
-
-        function formatInputRupiah(inputElement) {
-            let val = inputElement.value.replace(/[^,\d]/g, '');
-            if (val === '') {
-                inputElement.value = '';
-                return;
-            }
-            inputElement.value = new Intl.NumberFormat('id-ID').format(parseInt(val, 10));
-        }
-
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initData();
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-            
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID', options);
-            
-            const selector = document.getElementById('seksi-selector');
-            DAFTAR_SEKSI.forEach(seksi => {
-                let option = document.createElement('option');
-                option.value = seksi;
-                option.textContent = seksi;
-                selector.appendChild(option);
-            });
-            
-            document.getElementById('trans-tanggal').valueAsDate = new Date();
         });
 
-        function changeSeksi(seksiName) {
-            if (!seksiName) return;
-            
-            currentState.activeSeksi = seksiName;
-            
-            document.getElementById('empty-state').classList.add('hidden');
-            document.getElementById('dashboard-content').classList.remove('hidden');
-            document.getElementById('dashboard-content').classList.add('flex');
-            document.getElementById('active-seksi-title').textContent = seksiName;
-            switchTab('anggaran');
-        }
-
-        function switchTab(tabName) {
-            currentState.activeTab = tabName;
-            
-            const tabs = ['anggaran', 'transaksi', 'laporan'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`tab-btn-${t}`);
-                if (t === tabName) {
-                    btn.classList.remove('tab-inactive');
-                    btn.classList.add('tab-active');
-                    btn.style.backgroundColor = '#eff6ff'; 
-                } else {
-                    btn.classList.add('tab-inactive');
-                    btn.classList.remove('tab-active');
-                    btn.style.backgroundColor = 'transparent';
-                }
-            });
-
-            tabs.forEach(t => {
-                const content = document.getElementById(`tab-content-${t}`);
-                if (t === tabName) {
-                    content.classList.remove('hidden');
-                } else {
-                    content.classList.add('hidden');
-                }
-            });
-
-            if (tabName === 'anggaran') renderAnggaran();
-            if (tabName === 'transaksi') renderTransaksi();
-            if (tabName === 'laporan') renderLaporan();
-        }
-
-        function renderAnggaran() {
-            const seksi = currentState.activeSeksi;
-            const currentAnggaran = appData[seksi].anggaran;
-            const inputEl = document.getElementById('input-anggaran');
-            
-            if (currentAnggaran > 0) {
-                inputEl.value = new Intl.NumberFormat('id-ID').format(currentAnggaran);
+        tabs.forEach(t => {
+            const content = document.getElementById(`tab-content-${t}`);
+            if (t === tabName) {
+                content.classList.remove('hidden');
             } else {
-                inputEl.value = '';
+                content.classList.add('hidden');
             }
+        });
+
+        if (tabName === 'anggaran') renderAnggaran();
+        if (tabName === 'transaksi') renderTransaksi();
+        if (tabName === 'laporan') renderLaporan();
+    }
+
+    function renderAnggaran() {
+        const seksi = currentState.activeSeksi;
+        const currentAnggaran = appData[seksi].anggaran;
+        const inputEl = document.getElementById('input-anggaran');
+        
+        if (currentAnggaran > 0) {
+            inputEl.value = new Intl.NumberFormat('id-ID').format(currentAnggaran);
+        } else {
+            inputEl.value = '';
         }
+    }
 
-        function saveAnggaran() {
-            const seksi = currentState.activeSeksi;
-            const inputEl = document.getElementById('input-anggaran');
-            const nominal = unformatRupiah(inputEl.value);
-            
-            appData[seksi].anggaran = nominal;
-            saveToStorage();
-            
-            const toast = document.getElementById('anggaran-toast');
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-
-            if(nominal > 0) { 
-                inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
-            }
+    function saveAnggaran() {
+        const seksi = currentState.activeSeksi;
+        const inputEl = document.getElementById('input-anggaran');
+        const nominal = unformatRupiah(inputEl.value);
+        
+        appData[seksi].anggaran = nominal;
+        
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run.withSuccessHandler(() => {
+                const toast = document.getElementById('anggaran-toast');
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }).saveAnggaranSeksi(seksi, nominal);
         }
+        
+        if(nominal > 0) { 
+            inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
+        }
+    }
 
-        function renderTransaksi() {
-            const seksi = currentState.activeSeksi;
-            const tbody = document.getElementById('tabel-transaksi-body');
-            const transaksiList = appData[seksi].transaksi;
-            
-            tbody.innerHTML = ''; 
-            
-            if (transaksiList.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
-                            Belum ada transaksi tercatat.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            const sortedList = [...transaksiList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
-            sortedList.forEach((trx, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "bg-white border-b hover:bg-gray-50 transition-colors";
-                
-                const tgl = new Date(trx.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
-                
-                let inHtml = trx.jenis === 'pemasukan' ? `<span class="text-green-600 font-medium">+ ${formatRupiah(trx.nominal)}</span>` : '-';
-                let outHtml = trx.jenis === 'pengeluaran' ? `<span class="text-red-600 font-medium">- ${formatRupiah(trx.nominal)}</span>` : '-';
-
-                tr.innerHTML = `
-                    <td class="px-6 py-4 text-center font-medium">${index + 1}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${tgl}</td>
-                    <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900">${trx.keterangan}</div>
-                        <div class="text-xs text-gray-500 capitalize mt-0.5 inline-block px-2 py-0.5 rounded-full ${trx.jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${trx.jenis}</div>
+    function renderTransaksi() {
+        const seksi = currentState.activeSeksi;
+        const tbody = document.getElementById('tabel-transaksi-body');
+        const transaksiList = appData[seksi].transaksi;
+        
+        tbody.innerHTML = ''; 
+        
+        if (transaksiList.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
+                        Belum ada transaksi tercatat.
                     </td>
-                    <td class="px-6 py-4 text-right">${inHtml}</td>
-                    <td class="px-6 py-4 text-right">${outHtml}</td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="hapusTransaksi('${trx.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Hapus">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                </tr>
+            `;
+            return;
         }
 
-        function handleFormSubmit(event) {
-            event.preventDefault(); 
+        const sortedList = [...transaksiList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+        sortedList.forEach((trx, index) => {
+            const tr = document.createElement('tr');
+            tr.className = "bg-white border-b hover:bg-gray-50 transition-colors";
             
-            const seksi = currentState.activeSeksi;
-            if(!seksi) return;
+            const tgl = new Date(trx.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+            
+            let inHtml = trx.jenis === 'pemasukan' ? `<span class="text-green-600 font-medium">+ ${formatRupiah(trx.nominal)}</span>` : '-';
+            let outHtml = trx.jenis === 'pengeluaran' ? `<span class="text-red-600 font-medium">- ${formatRupiah(trx.nominal)}</span>` : '-';
 
-            const tanggal = document.getElementById('trans-tanggal').value;
-            const jenis = document.getElementById('trans-jenis').value;
-            const keterangan = document.getElementById('trans-keterangan').value;
-            const nominalStr = document.getElementById('trans-nominal').value;
-            const nominal = unformatRupiah(nominalStr);
+            tr.innerHTML = `
+                <td class="px-6 py-4 text-center font-medium">${index + 1}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${tgl}</td>
+                <td class="px-6 py-4">
+                    <div class="font-medium text-gray-900">${trx.keterangan}</div>
+                    <div class="text-xs text-gray-500 capitalize mt-0.5 inline-block px-2 py-0.5 rounded-full ${trx.jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${trx.jenis}</div>
+                </td>
+                <td class="px-6 py-4 text-right">${inHtml}</td>
+                <td class="px-6 py-4 text-right">${outHtml}</td>
+                <td class="px-6 py-4 text-center">
+                    <button onclick="hapusTransaksi('${trx.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Hapus">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 
-            if (nominal <= 0) {
-                const nomEl = document.getElementById('trans-nominal');
-                nomEl.classList.add('border-red-500');
-                setTimeout(() => nomEl.classList.remove('border-red-500'), 2000);
-                return;
+    function handleFormSubmit(event) {
+        event.preventDefault(); 
+        
+        const seksi = currentState.activeSeksi;
+        if(!seksi) return;
+
+        const tanggal = document.getElementById('trans-tanggal').value;
+        const jenis = document.getElementById('trans-jenis').value;
+        const keterangan = document.getElementById('trans-keterangan').value;
+        const nominalStr = document.getElementById('trans-nominal').value;
+        const nominal = unformatRupiah(nominalStr);
+
+        if (nominal <= 0) {
+            const nomEl = document.getElementById('trans-nominal');
+            nomEl.classList.add('border-red-500');
+            setTimeout(() => nomEl.classList.remove('border-red-500'), 2000);
+            return;
+        }
+
+        const newTransaksi = {
+            id: generateId(),
+            tanggal: tanggal,
+            jenis: jenis,
+            keterangan: keterangan,
+            nominal: nominal
+        };
+
+        // Simpan lokal & kirim ke Google Sheets
+        appData[seksi].transaksi.push(newTransaksi);
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run.addTransaksiSeksi(seksi, newTransaksi);
+        }
+
+        document.getElementById('trans-keterangan').value = '';
+        document.getElementById('trans-nominal').value = '';
+        renderTransaksi();
+    }
+
+    function hapusTransaksi(id) {
+        const seksi = currentState.activeSeksi;
+        appData[seksi].transaksi = appData[seksi].transaksi.filter(trx => trx.id !== id);
+
+        // Hapus dari Google Sheets
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run.deleteTransaksiSeksi(id);
+        }
+
+        renderTransaksi();
+    }
+
+    function renderLaporan() {
+        const seksi = currentState.activeSeksi;
+        const dataSeksi = appData[seksi];
+        
+        const anggaran = dataSeksi.anggaran || 0;
+        let totalPemasukan = 0;
+        let totalPengeluaran = 0;
+
+        dataSeksi.transaksi.forEach(trx => {
+            if (trx.jenis === 'pemasukan') {
+                totalPemasukan += trx.nominal;
+            } else if (trx.jenis === 'pengeluaran') {
+                totalPengeluaran += trx.nominal;
             }
+        });
+        const saldo = totalPemasukan - totalPengeluaran;
 
-            const newTransaksi = {
-                id: generateId(),
-                tanggal: tanggal,
-                jenis: jenis,
-                keterangan: keterangan,
-                nominal: nominal
-            };
-            appData[seksi].transaksi.push(newTransaksi);
-            saveToStorage();
-
-            document.getElementById('trans-keterangan').value = '';
-            document.getElementById('trans-nominal').value = '';
-            renderTransaksi();
+        document.getElementById('lap-anggaran').textContent = formatRupiah(anggaran);
+        document.getElementById('lap-pemasukan').textContent = formatRupiah(totalPemasukan);
+        document.getElementById('lap-pengeluaran').textContent = formatRupiah(totalPengeluaran);
+        
+        const saldoEl = document.getElementById('lap-saldo');
+        const cardSaldo = document.getElementById('card-saldo');
+        
+        saldoEl.textContent = formatRupiah(saldo);
+        
+        if (saldo < 0) {
+            saldoEl.classList.remove('text-gray-900', 'text-green-600');
+            saldoEl.classList.add('text-red-600');
+            cardSaldo.classList.remove('border-l-gray-300', 'border-l-green-500');
+            cardSaldo.classList.add('border-l-red-500');
+        } else {
+            saldoEl.classList.remove('text-red-600', 'text-gray-900');
+            saldoEl.classList.add('text-green-600');
+            cardSaldo.classList.remove('border-l-gray-300', 'border-l-red-500');
+            cardSaldo.classList.add('border-l-green-500');
         }
-
-        function hapusTransaksi(id) {
-            const seksi = currentState.activeSeksi;
-            appData[seksi].transaksi = appData[seksi].transaksi.filter(trx => trx.id !== id);
-            saveToStorage();
-            renderTransaksi();
+        document.getElementById('rekap-anggaran').textContent = formatRupiah(anggaran);
+        document.getElementById('rekap-pemasukan').textContent = formatRupiah(totalPemasukan);
+        document.getElementById('rekap-pengeluaran').textContent = formatRupiah(totalPengeluaran);
+        
+        const rekapSaldo = document.getElementById('rekap-saldo');
+        rekapSaldo.textContent = formatRupiah(saldo);
+        if(saldo < 0) {
+             rekapSaldo.classList.add('text-red-600');
+             rekapSaldo.classList.remove('text-green-600');
+        } else {
+             rekapSaldo.classList.add('text-green-600');
+             rekapSaldo.classList.remove('text-red-600');
         }
+    }
 
-        function renderLaporan() {
-            const seksi = currentState.activeSeksi;
-            const dataSeksi = appData[seksi];
-            
-            const anggaran = dataSeksi.anggaran || 0;
-            let totalPemasukan = 0;
-            let totalPengeluaran = 0;
+    function exportExcel() {
+        const seksi = currentState.activeSeksi;
+        if (!seksi) return;
 
-            dataSeksi.transaksi.forEach(trx => {
-                if (trx.jenis === 'pemasukan') {
-                    totalPemasukan += trx.nominal;
-                } else if (trx.jenis === 'pengeluaran') {
-                    totalPengeluaran += trx.nominal;
-                }
-            });
-            const saldo = totalPemasukan - totalPengeluaran;
+        const dataSeksi = appData[seksi];
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+        csvContent += "No;Tanggal;Keterangan;Pemasukan;Pengeluaran;Sisa Saldo\r\n";
+        let runningSaldo = 0;
+        const sortedList = [...dataSeksi.transaksi].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
-            document.getElementById('lap-anggaran').textContent = formatRupiah(anggaran);
-            document.getElementById('lap-pemasukan').textContent = formatRupiah(totalPemasukan);
-            document.getElementById('lap-pengeluaran').textContent = formatRupiah(totalPengeluaran);
+        sortedList.forEach((trx, index) => {
+            let pemasukan = trx.jenis === 'pemasukan' ? trx.nominal : 0;
+            let pengeluaran = trx.jenis === 'pengeluaran' ? trx.nominal : 0;
             
-            const saldoEl = document.getElementById('lap-saldo');
-            const cardSaldo = document.getElementById('card-saldo');
+            runningSaldo += pemasukan;
+            runningSaldo -= pengeluaran;
+            let ket = `"${trx.keterangan.replace(/"/g, '""')}"`;
             
-            saldoEl.textContent = formatRupiah(saldo);
-            
-            if (saldo < 0) {
-                saldoEl.classList.remove('text-gray-900', 'text-green-600');
-                saldoEl.classList.add('text-red-600');
-                cardSaldo.classList.remove('border-l-gray-300', 'border-l-green-500');
-                cardSaldo.classList.add('border-l-red-500');
-            } else {
-                saldoEl.classList.remove('text-red-600', 'text-gray-900');
-                saldoEl.classList.add('text-green-600');
-                cardSaldo.classList.remove('border-l-gray-300', 'border-l-red-500');
-                cardSaldo.classList.add('border-l-green-500');
+            csvContent += `${index + 1};${trx.tanggal};${ket};${pemasukan};${pengeluaran};${runningSaldo}\r\n`;
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        const safeSeksiName = seksi.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const dateNow = new Date().toISOString().split('T')[0];
+        link.setAttribute("download", `Laporan_Transaksi_${safeSeksiName}_${dateNow}.csv`);
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @media print {
+            body { background-color: white !important; }
+            header, footer, #seksi-selector, label[for="seksi-selector"], .flex.overflow-x-auto, button {
+                display: none !important;
             }
-            document.getElementById('rekap-anggaran').textContent = formatRupiah(anggaran);
-            document.getElementById('rekap-pemasukan').textContent = formatRupiah(totalPemasukan);
-            document.getElementById('rekap-pengeluaran').textContent = formatRupiah(totalPengeluaran);
-            
-            const rekapSaldo = document.getElementById('rekap-saldo');
-            rekapSaldo.textContent = formatRupiah(saldo);
-            if(saldo < 0) {
-                 rekapSaldo.classList.add('text-red-600');
-                 rekapSaldo.classList.remove('text-green-600');
-            } else {
-                 rekapSaldo.classList.add('text-green-600');
-                 rekapSaldo.classList.remove('text-red-600');
-            }
+            #dashboard-content { display: block !important; }
+            #tab-content-laporan { display: flex !important; }
+            .shadow-sm { box-shadow: none !important; border: 1px solid #ccc !important; }
         }
-
-        function exportExcel() {
-            const seksi = currentState.activeSeksi;
-            if (!seksi) return;
-
-            const dataSeksi = appData[seksi];
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-            csvContent += "No;Tanggal;Keterangan;Pemasukan;Pengeluaran;Sisa Saldo\r\n";
-            let runningSaldo = 0;
-            const sortedList = [...dataSeksi.transaksi].sort((a, b) => new Date(a.tanggal) - new Date(a.tanggal));
-
-            sortedList.forEach((trx, index) => {
-                let pemasukan = trx.jenis === 'pemasukan' ? trx.nominal : 0;
-                let pengeluaran = trx.jenis === 'pengeluaran' ? trx.nominal : 0;
-                
-                runningSaldo += pemasukan;
-                runningSaldo -= pengeluaran;
-                let ket = `"${trx.keterangan.replace(/"/g, '""')}"`;
-                
-                csvContent += `${index + 1};${trx.tanggal};${ket};${pemasukan};${pengeluaran};${runningSaldo}\r\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            const safeSeksiName = seksi.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const dateNow = new Date().toISOString().split('T')[0];
-            link.setAttribute("download", `Laporan_Transaksi_${safeSeksiName}_${dateNow}.csv`);
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @media print {
-                body { background-color: white !important; }
-                header, footer, #seksi-selector, label[for="seksi-selector"], .flex.overflow-x-auto, button {
-                    display: none !important;
-                }
-                #dashboard-content { display: block !important; }
-                #tab-content-laporan { display: flex !important; }
-                .shadow-sm { box-shadow: none !important; border: 1px solid #ccc !important; }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+    `;
+    document.head.appendChild(style);
+</script>
 </body>
 </html>
