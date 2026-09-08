@@ -78,7 +78,6 @@
                         <label for="seksi-selector" class="text-sm font-medium text-gray-700 hidden sm:block">Pilih Komisi:</label>
                         <select id="seksi-selector" onchange="changeSeksi(this.value)" class="w-full sm:w-64 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 shadow-sm transition-colors cursor-pointer">
                             <option value="" disabled selected>-- Pilih Komisi/Seksi --</option>
-                            <!-- Options will be populated by JS -->
                         </select>
                     </div>
                 </div>
@@ -88,7 +87,7 @@
         <!-- Main Content Area -->
         <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
-            <!-- Empty State (When no section is selected) -->
+            <!-- Empty State -->
             <div id="empty-state" class="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl shadow-sm border border-gray-100 h-full">
                 <div class="bg-blue-50 text-blue-500 p-4 rounded-full mb-4">
                     <i class="fas fa-hand-pointer text-4xl"></i>
@@ -97,7 +96,7 @@
                 <p class="text-gray-500 max-w-md">Silakan pilih komisi (seksi) pada menu dropdown di bagian atas untuk mulai mengelola anggaran dan transaksi.</p>
             </div>
 
-            <!-- Dashboard Content (Hidden by default) -->
+            <!-- Dashboard Content -->
             <div id="dashboard-content" class="hidden flex-col gap-6">
                 
                 <!-- Section Title & Tabs -->
@@ -147,7 +146,7 @@
                             </button>
                         </div>
                         
-                        <!-- Notification Toast Area -->
+                        <!-- Notification Toast -->
                         <div id="anggaran-toast" class="mt-4 p-4 bg-green-50 text-green-700 rounded-lg hidden flex items-center gap-3">
                             <i class="fas fa-check-circle"></i>
                             <span class="font-medium">Anggaran berhasil diperbarui.</span>
@@ -157,15 +156,13 @@
 
                 <!-- TAB CONTENT: TRANSAKSI -->
                 <div id="tab-content-transaksi" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in">
-                    
-                    <!-- Add Transaction Form -->
                     <div class="p-6 border-b border-gray-200 bg-gray-50">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                             <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 <i class="fas fa-plus-circle text-primary-600"></i> Tambah Transaksi Baru
                             </h3>
                             <button onclick="exportExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
-                                <i class="fas fa-file-excel"></i> Export Excel
+                                <i class="fas fa-file-excel"></i> Export CSV/Excel
                             </button>
                         </div>
                         <form id="form-transaksi" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
@@ -196,7 +193,6 @@
                         </form>
                     </div>
 
-                    <!-- Transaction Table -->
                     <div class="p-0">
                         <div class="table-container overflow-x-auto w-full">
                             <table class="w-full text-sm text-left text-gray-500 min-w-[800px]">
@@ -211,7 +207,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tabel-transaksi-body">
-                                    <!-- Rows will be populated by JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -220,28 +215,19 @@
 
                 <!-- TAB CONTENT: LAPORAN -->
                 <div id="tab-content-laporan" class="hidden flex-col gap-6 animate-fade-in">
-                    
-                    <!-- Summary Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- Anggaran Card -->
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 border-l-4 border-l-blue-500">
                             <p class="text-sm font-medium text-gray-500 truncate mb-1">Anggaran Ditetapkan</p>
                             <p id="lap-anggaran" class="text-2xl font-bold text-gray-900">Rp 0</p>
                         </div>
-                        
-                        <!-- Pemasukan Card -->
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 border-l-4 border-l-green-500">
                             <p class="text-sm font-medium text-gray-500 truncate mb-1">Total Pemasukan</p>
                             <p id="lap-pemasukan" class="text-2xl font-bold text-green-600">Rp 0</p>
                         </div>
-                        
-                        <!-- Pengeluaran Card -->
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 border-l-4 border-l-red-500">
                             <p class="text-sm font-medium text-gray-500 truncate mb-1">Total Pengeluaran</p>
                             <p id="lap-pengeluaran" class="text-2xl font-bold text-red-600">Rp 0</p>
                         </div>
-                        
-                        <!-- Saldo Card -->
                         <div id="card-saldo" class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 border-l-4">
                             <p class="text-sm font-medium text-gray-500 truncate mb-1">Sisa Dana (Saldo)</p>
                             <p id="lap-saldo" class="text-2xl font-bold">Rp 0</p>
@@ -249,7 +235,6 @@
                         </div>
                     </div>
 
-                    <!-- Detailed Report View -->
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                             <h3 class="text-lg font-bold text-gray-800">Rekapitulasi Keuangan</h3>
@@ -294,13 +279,12 @@
         <!-- Footer -->
         <footer class="bg-white border-t border-gray-200 mt-auto">
             <div class="max-w-7xl mx-auto px-4 py-4 text-center text-sm text-gray-500">
-                &copy; <span id="current-year"></span> Sistem Aplikasi LPJ Keuangan. Data disimpan secara lokal (sementara).
+                &copy; <span id="current-year"></span> Sistem Aplikasi LPJ Keuangan. Data disimpan secara lokal di browser.
             </div>
         </footer>
     </div>
 
     <script>
-        
         const DAFTAR_SEKSI = [
             "Seksi Acara", 
             "Seksi Dekorasi dan Perlengkapan", 
@@ -315,18 +299,28 @@
         let appData = {};
         let currentState = {
             activeSeksi: null,
-            activeTab: 'anggaran' // 'anggaran', 'transaksi', 'laporan'
+            activeTab: 'anggaran'
         };
 
-        DAFTAR_SEKSI.forEach(seksi => {
-            appData[seksi] = {
-                anggaran: 0,
-                transaksi: []
-            };
-        });
-        /**
-         * Format angka menjadi string Rupiah (misal: 1000000 -> 1.000.000)
-         */
+        function initData() {
+            const savedData = localStorage.getItem('lpj_app_data');
+            if (savedData) {
+                appData = JSON.parse(savedData);
+            } else {
+                DAFTAR_SEKSI.forEach(seksi => {
+                    appData[seksi] = {
+                        anggaran: 0,
+                        transaksi: []
+                    };
+                });
+                saveToStorage();
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('lpj_app_data', JSON.stringify(appData));
+        }
+
         function formatRupiah(number) {
             if (number === 0) return 'Rp 0';
             if (!number) return '';
@@ -335,17 +329,13 @@
             let formatted = new Intl.NumberFormat('id-ID').format(absNumber);
             return isNegative ? `-Rp ${formatted}` : `Rp ${formatted}`;
         }
-        /**
-         * Unformat string Rupiah kembali ke angka (misal: 1.000.000 -> 1000000)
-         */
+
         function unformatRupiah(rupiahString) {
             if (!rupiahString) return 0;
-            let cleanString = rupiahString.replace(/[^,\d]/g, ''); // Hapus selain angka
+            let cleanString = rupiahString.replace(/[^,\d]/g, '');
             return parseInt(cleanString, 10) || 0;
         }
-        /**
-         * Fungsi untuk memformat input text saat user mengetik
-         */
+
         function formatInputRupiah(inputElement) {
             let val = inputElement.value.replace(/[^,\d]/g, '');
             if (val === '') {
@@ -354,37 +344,29 @@
             }
             inputElement.value = new Intl.NumberFormat('id-ID').format(parseInt(val, 10));
         }
-        /**
-         * Menghasilkan ID unik sederhana
-         */
+
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
-    document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-    
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID', options);
-    
-    const selector = document.getElementById('seksi-selector');
-    DAFTAR_SEKSI.forEach(seksi => {
-        let option = document.createElement('option');
-        option.value = seksi;
-        option.textContent = seksi;
-        selector.appendChild(option);
-    });
-    
-    document.getElementById('trans-tanggal').valueAsDate = new Date();
-    google.script.run.withSuccessHandler((dataDariSheets) => {
-        if (dataDariSheets) {
-            appData = dataDariSheets; 
-            console.log("Data berhasil dimuat dari Google Sheets!");
-        }
-    }).getInitialData();
-});
-        /**
-         * Dipanggil ketika user memilih komisi dari dropdown
-         */
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initData();
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID', options);
+            
+            const selector = document.getElementById('seksi-selector');
+            DAFTAR_SEKSI.forEach(seksi => {
+                let option = document.createElement('option');
+                option.value = seksi;
+                option.textContent = seksi;
+                selector.appendChild(option);
+            });
+            
+            document.getElementById('trans-tanggal').valueAsDate = new Date();
+        });
+
         function changeSeksi(seksiName) {
             if (!seksiName) return;
             
@@ -396,9 +378,7 @@
             document.getElementById('active-seksi-title').textContent = seksiName;
             switchTab('anggaran');
         }
-        /**
-         * Mengganti tab yang aktif (Anggaran, Transaksi, Laporan)
-         */
+
         function switchTab(tabName) {
             currentState.activeTab = tabName;
             
@@ -420,7 +400,6 @@
                 const content = document.getElementById(`tab-content-${t}`);
                 if (t === tabName) {
                     content.classList.remove('hidden');
-                   
                 } else {
                     content.classList.add('hidden');
                 }
@@ -430,9 +409,7 @@
             if (tabName === 'transaksi') renderTransaksi();
             if (tabName === 'laporan') renderLaporan();
         }
-        /**
-         * Merender halaman tab Anggaran
-         */
+
         function renderAnggaran() {
             const seksi = currentState.activeSeksi;
             const currentAnggaran = appData[seksi].anggaran;
@@ -444,32 +421,26 @@
                 inputEl.value = '';
             }
         }
-        /**
-         * Menyimpan nilai anggaran yang diinput
-         */
-       function saveAnggaran() {
-    const seksi = currentState.activeSeksi;
-    const inputEl = document.getElementById('input-anggaran');
-    const nominal = unformatRupiah(inputEl.value);
-    
-    appData[seksi].anggaran = nominal;
-    
-    google.script.run.withSuccessHandler((response) => {
-       
-        const toast = document.getElementById('anggaran-toast');
-        toast.classList.remove('hidden');
-        setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 3000);
-    }).saveAnggaranSeksi(seksi, nominal);
-    
-    if(nominal > 0) { 
-         inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
-    }
-}
-        /**
-         * Merender tabel transaksi
-         */
+
+        function saveAnggaran() {
+            const seksi = currentState.activeSeksi;
+            const inputEl = document.getElementById('input-anggaran');
+            const nominal = unformatRupiah(inputEl.value);
+            
+            appData[seksi].anggaran = nominal;
+            saveToStorage();
+            
+            const toast = document.getElementById('anggaran-toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+
+            if(nominal > 0) { 
+                inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
+            }
+        }
+
         function renderTransaksi() {
             const seksi = currentState.activeSeksi;
             const tbody = document.getElementById('tabel-transaksi-body');
@@ -517,9 +488,7 @@
                 tbody.appendChild(tr);
             });
         }
-        /**
-         * Menangani form submit tambah transaksi
-         */
+
         function handleFormSubmit(event) {
             event.preventDefault(); 
             
@@ -547,23 +516,20 @@
                 nominal: nominal
             };
             appData[seksi].transaksi.push(newTransaksi);
+            saveToStorage();
+
             document.getElementById('trans-keterangan').value = '';
             document.getElementById('trans-nominal').value = '';
             renderTransaksi();
         }
 
-        /**
-         * Menghapus transaksi berdasarkan ID
-         */
         function hapusTransaksi(id) {
             const seksi = currentState.activeSeksi;
             appData[seksi].transaksi = appData[seksi].transaksi.filter(trx => trx.id !== id);
+            saveToStorage();
             renderTransaksi();
         }
 
-        /**
-         * Menghitung dan merender data laporan
-         */
         function renderLaporan() {
             const seksi = currentState.activeSeksi;
             const dataSeksi = appData[seksi];
@@ -616,9 +582,6 @@
             }
         }
 
-        /**
-         * Export data transaksi ke format CSV (bisa dibuka di Excel)
-         */
         function exportExcel() {
             const seksi = currentState.activeSeksi;
             if (!seksi) return;
@@ -627,7 +590,7 @@
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
             csvContent += "No;Tanggal;Keterangan;Pemasukan;Pengeluaran;Sisa Saldo\r\n";
             let runningSaldo = 0;
-            const sortedList = [...dataSeksi.transaksi].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+            const sortedList = [...dataSeksi.transaksi].sort((a, b) => new Date(a.tanggal) - new Date(a.tanggal));
 
             sortedList.forEach((trx, index) => {
                 let pemasukan = trx.jenis === 'pemasukan' ? trx.nominal : 0;
@@ -664,7 +627,6 @@
             }
         `;
         document.head.appendChild(style);
-
     </script>
 </body>
 </html>
