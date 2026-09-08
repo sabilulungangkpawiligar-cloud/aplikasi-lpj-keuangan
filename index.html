@@ -284,7 +284,10 @@
         </footer>
     </div>
 
-    <script>
+   <script>
+    // MASUKKAN URL WEB APP EXEC KAMU DI SINI
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwADCpmrYUfUY1fWPJA_Zl3Z6J0lkEUvtNNd-YbS0ou2PcbIfcT7h_tmDwNd7GzFdaI/exec";
+
     const DAFTAR_SEKSI = [
         "Seksi Acara", 
         "Seksi Dekorasi dan Perlengkapan", 
@@ -333,12 +336,12 @@
         inputElement.value = new Intl.NumberFormat('id-ID').format(parseInt(val, 10));
     }
 
-   function generateId() {
-    const today = new Date();
-    const dateStr = today.toISOString().split('T')[0].replace(/-/g, ''); // yyyymmdd
-    const randomNum = Math.floor(100 + Math.random() * 900); // 3 angka acak
-    return `TRX-${dateStr}-${randomNum}`;
-}
+    function generateId() {
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+        const randomNum = Math.floor(100 + Math.random() * 900);
+        return `TRX-${dateStr}-${randomNum}`;
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -356,18 +359,19 @@
         
         document.getElementById('trans-tanggal').valueAsDate = new Date();
 
-        // Ambil data awal dari Google Sheets
-        if (typeof google !== 'undefined' && google.script) {
-            google.script.run.withSuccessHandler((dataDariSheets) => {
+        // Load data awal via API fetch
+        fetch(SCRIPT_URL + "?action=getInitialData")
+            .then(res => res.json())
+            .then(dataDariSheets => {
                 if (dataDariSheets) {
-                    appData = dataDariSheets; 
+                    appData = dataDariSheets;
                     console.log("Data berhasil dimuat dari Google Sheets!");
                     if (currentState.activeSeksi) {
                         switchTab(currentState.activeTab);
                     }
                 }
-            }).getInitialData();
-        }
+            })
+            .catch(err => console.error("Gagal mengambil data dari Google Sheets:", err));
     });
 
     function changeSeksi(seksiName) {
@@ -430,16 +434,24 @@
         const nominal = unformatRupiah(inputEl.value);
         
         appData[seksi].anggaran = nominal;
-        
-        if (typeof google !== 'undefined' && google.script) {
-            google.script.run.withSuccessHandler(() => {
-                const toast = document.getElementById('anggaran-toast');
-                toast.classList.remove('hidden');
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 3000);
-            }).saveAnggaranSeksi(seksi, nominal);
-        }
+
+        // Kirim ke Google Sheets via fetch API
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "saveAnggaran",
+                seksi: seksi,
+                nominal: nominal
+            })
+        }).then(() => {
+            const toast = document.getElementById('anggaran-toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        });
         
         if(nominal > 0) { 
             inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
@@ -521,27 +533,41 @@
             nominal: nominal
         };
 
-        // Simpan lokal & kirim ke Google Sheets
+        // Simpan ke local state
         appData[seksi].transaksi.push(newTransaksi);
-        if (typeof google !== 'undefined' && google.script) {
-            google.script.run.addTransaksiSeksi(seksi, newTransaksi);
-        }
+        renderTransaksi();
+
+        // Kirim ke Google Sheets via fetch API
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "addTransaksi",
+                seksi: seksi,
+                data: newTransaksi
+            })
+        });
 
         document.getElementById('trans-keterangan').value = '';
         document.getElementById('trans-nominal').value = '';
-        renderTransaksi();
     }
 
     function hapusTransaksi(id) {
         const seksi = currentState.activeSeksi;
         appData[seksi].transaksi = appData[seksi].transaksi.filter(trx => trx.id !== id);
-
-        // Hapus dari Google Sheets
-        if (typeof google !== 'undefined' && google.script) {
-            google.script.run.deleteTransaksiSeksi(id);
-        }
-
         renderTransaksi();
+
+        // Hapus dari Google Sheets via fetch API
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "deleteTransaksi",
+                id: id
+            })
+        });
     }
 
     function renderLaporan() {
@@ -604,7 +630,7 @@
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
         csvContent += "No;Tanggal;Keterangan;Pemasukan;Pengeluaran;Sisa Saldo\r\n";
         let runningSaldo = 0;
-        const sortedList = [...dataSeksi.transaksi].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+        const sortedList = [...dataSeksi.transaksi].sort((a, b) => new Date(a.tanggal) - new Date(a.tanggal));
 
         sortedList.forEach((trx, index) => {
             let pemasukan = trx.jenis === 'pemasukan' ? trx.nominal : 0;
@@ -627,20 +653,6 @@
         link.click();
         document.body.removeChild(link);
     }
-
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @media print {
-            body { background-color: white !important; }
-            header, footer, #seksi-selector, label[for="seksi-selector"], .flex.overflow-x-auto, button {
-                display: none !important;
-            }
-            #dashboard-content { display: block !important; }
-            #tab-content-laporan { display: flex !important; }
-            .shadow-sm { box-shadow: none !important; border: 1px solid #ccc !important; }
-        }
-    `;
-    document.head.appendChild(style);
 </script>
 </body>
 </html>
