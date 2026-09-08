@@ -8,11 +8,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Library untuk Cetak PDF (html2pdf + Dependencies) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -78,18 +73,12 @@
                         <h1 class="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">LPJ Keuangan App</h1>
                     </div>
                     
-                    <!-- Section Selector & PDF Button -->
-                    <div class="w-full sm:w-auto flex flex-wrap items-center gap-3">
-                        <button id="btn-cetak-pdf" type="button" onclick="generatePDFGabungan()" class="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2 cursor-pointer">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>Cetak PDF Gabungan</span>
-                        </button>
-                        <div class="flex items-center gap-2">
-                            <label for="seksi-selector" class="text-sm font-medium text-gray-700 hidden sm:block">Pilih Komisi:</label>
-                            <select id="seksi-selector" onchange="changeSeksi(this.value)" class="w-full sm:w-64 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 shadow-sm transition-colors cursor-pointer">
-                                <option value="" disabled selected>-- Pilih Komisi/Seksi --</option>
-                            </select>
-                        </div>
+                    <!-- Section Selector -->
+                    <div class="w-full sm:w-auto flex items-center gap-2">
+                        <label for="seksi-selector" class="text-sm font-medium text-gray-700 hidden sm:block">Pilih Komisi:</label>
+                        <select id="seksi-selector" onchange="changeSeksi(this.value)" class="w-full sm:w-64 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 shadow-sm transition-colors cursor-pointer">
+                            <option value="" disabled selected>-- Pilih Komisi/Seksi --</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -132,7 +121,7 @@
                         </button>
                     </div>
                 </div>
-                  
+
                 <!-- TAB CONTENT: ANGGARAN -->
                 <div id="tab-content-anggaran" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 animate-fade-in">
                     <div class="max-w-xl mx-auto">
@@ -172,6 +161,9 @@
                             <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 <i class="fas fa-plus-circle text-primary-600"></i> Tambah Transaksi Baru
                             </h3>
+                            <button onclick="exportExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                                <i class="fas fa-file-excel"></i> Export CSV/Excel
+                            </button>
                         </div>
                         <form id="form-transaksi" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                             <div class="lg:col-span-1">
@@ -245,9 +237,9 @@
 
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-lg font-bold text-gray-800">Rekapitulasi Keuangan Seksi</h3>
+                            <h3 class="text-lg font-bold text-gray-800">Rekapitulasi Keuangan</h3>
                             <button onclick="window.print()" class="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center gap-1">
-                                <i class="fas fa-print"></i> Cetak / PDF
+                                <i class="fas fa-print"></i> Cetak/PDF
                             </button>
                         </div>
                         <div class="p-6">
@@ -287,424 +279,11 @@
         <!-- Footer -->
         <footer class="bg-white border-t border-gray-200 mt-auto">
             <div class="max-w-7xl mx-auto px-4 py-4 text-center text-sm text-gray-500">
-                &copy; <span id="current-year"></span> Sistem Aplikasi LPJ Keuangan.
+                &copy; <span id="current-year"></span> Sistem Aplikasi LPJ Keuangan. Data disimpan secara lokal di browser.
             </div>
         </footer>
     </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwADCpmrYUfUY1fWPJA_Zl3Z6J0lkEUvtNNd-YbS0ou2PcbIfcT7h_tmDwNd7GzFdaI/exec";
-
-        const DAFTAR_SEKSI = [
-            "Seksi Acara", 
-            "Seksi Dekorasi dan Perlengkapan", 
-            "Seksi Publikasi dan Dokumentasi", 
-            "SMKA", 
-            "Seksi Konsumsi", 
-            "Seksi Keamanan", 
-            "Sekretariat", 
-            "Seksi Dana Usaha"
-        ];
-
-        let appData = {};
-        let currentState = {
-            activeSeksi: null,
-            activeTab: 'anggaran'
-        };
-
-        DAFTAR_SEKSI.forEach(seksi => {
-            appData[seksi] = {
-                anggaran: 0,
-                transaksi: []
-            };
-        });
-
-        function formatRupiah(number) {
-            if (number === 0) return 'Rp 0';
-            if (!number) return 'Rp 0';
-            let isNegative = number < 0;
-            let absNumber = Math.abs(number);
-            let formatted = new Intl.NumberFormat('id-ID').format(absNumber);
-            return isNegative ? `-Rp ${formatted}` : `Rp ${formatted}`;
-        }
-
-        function unformatRupiah(rupiahString) {
-            if (!rupiahString) return 0;
-            let cleanString = rupiahString.toString().replace(/[^,\d]/g, '');
-            return parseInt(cleanString, 10) || 0;
-        }
-
-        function formatInputRupiah(inputElement) {
-            let val = inputElement.value.replace(/[^,\d]/g, '');
-            if (val === '') {
-                inputElement.value = '';
-                return;
-            }
-            inputElement.value = new Intl.NumberFormat('id-ID').format(parseInt(val, 10));
-        }
-
-        function generateId() {
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
-            const randomNum = Math.floor(100 + Math.random() * 900);
-            return `TRX-${dateStr}-${randomNum}`;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-            
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID', options);
-            
-            const selector = document.getElementById('seksi-selector');
-            DAFTAR_SEKSI.forEach(seksi => {
-                let option = document.createElement('option');
-                option.value = seksi;
-                option.textContent = seksi;
-                selector.appendChild(option);
-            });
-            
-            document.getElementById('trans-tanggal').valueAsDate = new Date();
-
-            fetch(SCRIPT_URL + "?action=getInitialData")
-                .then(res => res.json())
-                .then(dataDariSheets => {
-                    if (dataDariSheets) {
-                        appData = dataDariSheets;
-                        if (currentState.activeSeksi) {
-                            switchTab(currentState.activeTab);
-                        }
-                    }
-                })
-                .catch(err => console.error("Gagal mengambil data dari Google Sheets:", err));
-        });
-
-        function changeSeksi(seksiName) {
-            if (!seksiName) return;
-            currentState.activeSeksi = seksiName;
-            
-            document.getElementById('empty-state').classList.add('hidden');
-            document.getElementById('dashboard-content').classList.remove('hidden');
-            document.getElementById('dashboard-content').classList.add('flex');
-            document.getElementById('active-seksi-title').textContent = seksiName;
-            switchTab('anggaran');
-        }
-
-        function switchTab(tabName) {
-            currentState.activeTab = tabName;
-            
-            const tabs = ['anggaran', 'transaksi', 'laporan'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`tab-btn-${t}`);
-                if (t === tabName) {
-                    btn.classList.remove('tab-inactive');
-                    btn.classList.add('tab-active');
-                    btn.style.backgroundColor = '#eff6ff'; 
-                } else {
-                    btn.classList.add('tab-inactive');
-                    btn.classList.remove('tab-active');
-                    btn.style.backgroundColor = 'transparent';
-                }
-            });
-
-            tabs.forEach(t => {
-                const content = document.getElementById(`tab-content-${t}`);
-                if (t === tabName) {
-                    content.classList.remove('hidden');
-                } else {
-                    content.classList.add('hidden');
-                }
-            });
-
-            if (tabName === 'anggaran') renderAnggaran();
-            if (tabName === 'transaksi') renderTransaksi();
-            if (tabName === 'laporan') renderLaporan();
-        }
-
-        function renderAnggaran() {
-            const seksi = currentState.activeSeksi;
-            const currentAnggaran = appData[seksi]?.anggaran || 0;
-            const inputEl = document.getElementById('input-anggaran');
-            
-            if (currentAnggaran > 0) {
-                inputEl.value = new Intl.NumberFormat('id-ID').format(currentAnggaran);
-            } else {
-                inputEl.value = '';
-            }
-        }
-
-        function saveAnggaran() {
-            const seksi = currentState.activeSeksi;
-            const inputEl = document.getElementById('input-anggaran');
-            const nominal = unformatRupiah(inputEl.value);
-            
-            if (!appData[seksi]) appData[seksi] = { anggaran: 0, transaksi: [] };
-            appData[seksi].anggaran = nominal;
-
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "saveAnggaran",
-                    seksi: seksi,
-                    nominal: nominal
-                })
-            }).then(() => {
-                const toast = document.getElementById('anggaran-toast');
-                toast.classList.remove('hidden');
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 3000);
-            });
-            
-            if(nominal > 0) { 
-                inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
-            }
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const seksi = currentState.activeSeksi;
-            const tanggal = document.getElementById('trans-tanggal').value;
-            const jenis = document.getElementById('trans-jenis').value;
-            const nominal = unformatRupiah(document.getElementById('trans-nominal').value);
-            const keterangan = document.getElementById('trans-keterangan').value;
-
-            if (!nominal || nominal <= 0) {
-                alert('Nominal harus lebih dari 0');
-                return;
-            }
-
-            const newTrx = {
-                id: generateId(),
-                tanggal: tanggal,
-                jenis: jenis,
-                nominal: nominal,
-                keterangan: keterangan
-            };
-
-            if (!appData[seksi].transaksi) appData[seksi].transaksi = [];
-            appData[seksi].transaksi.push(newTrx);
-
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "addTransaksi",
-                    seksi: seksi,
-                    transaksi: newTrx
-                })
-            }).then(() => {
-                renderTransaksi();
-                document.getElementById('trans-nominal').value = '';
-                document.getElementById('trans-keterangan').value = '';
-            });
-        }
-
-        function deleteTransaksi(id) {
-            if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
-            const seksi = currentState.activeSeksi;
-            appData[seksi].transaksi = appData[seksi].transaksi.filter(t => t.id !== id);
-
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "deleteTransaksi",
-                    seksi: seksi,
-                    id: id
-                })
-            }).then(() => {
-                renderTransaksi();
-            });
-        }
-
-        function renderTransaksi() {
-            const seksi = currentState.activeSeksi;
-            const tbody = document.getElementById('tabel-transaksi-body');
-            const transaksiList = appData[seksi]?.transaksi || [];
-            
-            tbody.innerHTML = ''; 
-            
-            if (transaksiList.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
-                            Belum ada transaksi tercatat.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            const sortedList = [...transaksiList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
-            sortedList.forEach((trx, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "bg-white border-b hover:bg-gray-50 transition-colors";
-                
-                const tgl = new Date(trx.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
-                
-                let inHtml = trx.jenis === 'pemasukan' ? `<span class="text-green-600 font-medium">+ ${formatRupiah(trx.nominal)}</span>` : '-';
-                let outHtml = trx.jenis === 'pengeluaran' ? `<span class="text-red-600 font-medium">- ${formatRupiah(trx.nominal)}</span>` : '-';
-
-                tr.innerHTML = `
-                    <td class="px-6 py-4 text-center font-medium">${index + 1}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${tgl}</td>
-                    <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900">${trx.keterangan}</div>
-                    </td>
-                    <td class="px-6 py-4 text-right">${inHtml}</td>
-                    <td class="px-6 py-4 text-right">${outHtml}</td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="deleteTransaksi('${trx.id}')" class="text-red-500 hover:text-red-700 p-1">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderLaporan() {
-            const seksi = currentState.activeSeksi;
-            const data = appData[seksi] || { anggaran: 0, transaksi: [] };
-
-            let totalMasuk = 0;
-            let totalKeluar = 0;
-
-            (data.transaksi || []).forEach(trx => {
-                if (trx.jenis === 'pemasukan') totalMasuk += trx.nominal;
-                if (trx.jenis === 'pengeluaran') totalKeluar += trx.nominal;
-            });
-
-            let saldo = totalMasuk - totalKeluar;
-
-            document.getElementById('lap-anggaran').textContent = formatRupiah(data.anggaran);
-            document.getElementById('lap-pemasukan').textContent = formatRupiah(totalMasuk);
-            document.getElementById('lap-pengeluaran').textContent = formatRupiah(totalKeluar);
-            document.getElementById('lap-saldo').textContent = formatRupiah(saldo);
-
-            document.getElementById('rekap-anggaran').textContent = formatRupiah(data.anggaran);
-            document.getElementById('rekap-pemasukan').textContent = formatRupiah(totalMasuk);
-            document.getElementById('rekap-pengeluaran').textContent = formatRupiah(totalKeluar);
-            document.getElementById('rekap-saldo').textContent = formatRupiah(saldo);
-
-            const cardSaldo = document.getElementById('card-saldo');
-            if (saldo < 0) {
-                cardSaldo.className = "bg-white rounded-xl shadow-sm border border-gray-200 p-5 border-l-4 border-l-red-500 text-red-600";
-            } else {
-                cardSaldo.className = "bg-white rounded-xl shadow-sm border border-gray-200 p-5 border-l-4 border-l-green-500 text-green-600";
-            }
-        }
-
-        function generatePDFGabungan() {
-            let totalAnggaranSemua = 0;
-            let totalPemasukanSemua = 0;
-            let totalPengeluaranSemua = 0;
-
-            let barisTabelHTML = '';
-
-            DAFTAR_SEKSI.forEach((seksi, idx) => {
-                let anggaran = appData[seksi]?.anggaran || 0;
-                let masuk = 0;
-                let keluar = 0;
-
-                (appData[seksi]?.transaksi || []).forEach(trx => {
-                    if (trx.jenis === 'pemasukan') masuk += trx.nominal;
-                    if (trx.jenis === 'pengeluaran') keluar += trx.nominal;
-                });
-
-                let saldo = masuk - keluar;
-
-                totalAnggaranSemua += anggaran;
-                totalPemasukanSemua += masuk;
-                totalPengeluaranSemua += keluar;
-
-                barisTabelHTML += `
-                    <tr style="border-bottom: 1px solid #e5e7eb;">
-                        <td style="padding: 8px; text-align: center;">${idx + 1}</td>
-                        <td style="padding: 8px; font-weight: 500;">${seksi}</td>
-                        <td style="padding: 8px; text-align: right;">${formatRupiah(anggaran)}</td>
-                        <td style="padding: 8px; text-align: right; color: #16a34a;">${formatRupiah(masuk)}</td>
-                        <td style="padding: 8px; text-align: right; color: #dc2626;">${formatRupiah(keluar)}</td>
-                        <td style="padding: 8px; text-align: right; font-weight: bold; color: ${saldo < 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(saldo)}</td>
-                    </tr>
-                `;
-            });
-
-            let totalSaldoSemua = totalPemasukanSemua - totalPengeluaranSemua;
-            let tglCetak = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-            const element = document.createElement('div');
-            element.style.padding = '20px';
-            element.style.fontFamily = 'sans-serif';
-            element.style.color = '#1f2937';
-
-            element.innerHTML = `
-                <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">
-                    <h2 style="margin: 0; font-size: 20px; text-transform: uppercase; color: #1e3a8a;">Laporan Pertanggungjawaban (LPJ) Keuangan</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Rekapitulasi Gabungan Seluruh Seksi / Komisi Kepanitiaan</p>
-                    <p style="margin: 2px 0 0 0; font-size: 11px; color: #6b7280;">Dicetak pada: ${tglCetak}</p>
-                </div>
-
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
-                    <thead>
-                        <tr style="background-color: #2563eb; color: white;">
-                            <th style="padding: 8px; text-align: center;">No</th>
-                            <th style="padding: 8px; text-align: left;">Nama Seksi / Komisi</th>
-                            <th style="padding: 8px; text-align: right;">Anggaran</th>
-                            <th style="padding: 8px; text-align: right;">Real. Pemasukan</th>
-                            <th style="padding: 8px; text-align: right;">Real. Pengeluaran</th>
-                            <th style="padding: 8px; text-align: right;">Sisa Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${barisTabelHTML}
-                    </tbody>
-                    <tfoot>
-                        <tr style="background-color: #f3f4f6; font-weight: bold; border-top: 2px solid #1f2937;">
-                            <td colspan="2" style="padding: 10px; text-align: center;">TOTAL KESELURUHAN</td>
-                            <td style="padding: 10px; text-align: right;">${formatRupiah(totalAnggaranSemua)}</td>
-                            <td style="padding: 10px; text-align: right; color: #16a34a;">${formatRupiah(totalPemasukanSemua)}</td>
-                            <td style="padding: 10px; text-align: right; color: #dc2626;">${formatRupiah(totalPengeluaranSemua)}</td>
-                            <td style="padding: 10px; text-align: right; color: ${totalSaldoSemua < 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(totalSaldoSemua)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-
-                <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 12px; text-align: center;">
-                    <div style="width: 40%;">
-                        <p>Mengetahui,<br><b>Ketua Panitia</b></p>
-                        <br><br><br>
-                        <p>( _______________________ )</p>
-                    </div>
-                    <div style="width: 40%;">
-                        <p>Dibuat oleh,<br><b>Bendahara Panitia</b></p>
-                        <br><br><br>
-                        <p>( _______________________ )</p>
-                    </div>
-                </div>
-            `;
-
-            const opt = {
-                margin:       10,
-                filename:     `LPJ_Gabungan_Kepanitiaan_${new Date().toISOString().split('T')[0]}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
-
-            if (typeof html2pdf !== 'undefined') {
-                html2pdf().set(opt).from(element).save();
-            } else {
-                alert('Library pencetak PDF sedang dimuat, silakan tunggu sebentar dan coba lagi.');
-            }
-        }
    <script>
     // MASUKKAN URL WEB APP EXEC KAMU DI SINI
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwADCpmrYUfUY1fWPJA_Zl3Z6J0lkEUvtNNd-YbS0ou2PcbIfcT7h_tmDwNd7GzFdaI/exec";
