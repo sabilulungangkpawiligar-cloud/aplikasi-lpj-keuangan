@@ -121,9 +121,13 @@
                         <button onclick="switchTab('laporan')" id="tab-btn-laporan" class="flex-1 min-w-[120px] py-4 px-6 text-sm font-medium text-center tab-inactive transition-colors flex items-center justify-center gap-2">
                             <i class="fas fa-chart-pie"></i> Laporan
                         </button>
+                        <button onclick="generatePDFGabungan()" class="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg shadow transition-colors flex items-center gap-2">
+    <i class="fas fa-file-pdf"></i>
+    <span>Cetak PDF Gabungan</span>
+</button>
                     </div>
                 </div>
-
+                 
                 <!-- TAB CONTENT: ANGGARAN -->
                 <div id="tab-content-anggaran" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 animate-fade-in">
                     <div class="max-w-xl mx-auto">
