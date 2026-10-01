@@ -382,8 +382,9 @@ function populateSeksiDropdown() {
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('current-year').textContent = new Date().getFullYear();
         
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID', options);
+       const today = new Date();
+        const tglCetakUI = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+            document.getElementById('print-date').textContent = tglCetakUI;
         
         const selector = document.getElementById('seksi-selector');
         DAFTAR_SEKSI.forEach(seksi => {
@@ -754,7 +755,8 @@ function populateSeksiDropdown() {
             });
 
             let totalSaldoSemua = totalPemasukanSemua - totalPengeluaranSemua;
-            let tglCetak = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            let todayPDF = new Date();
+            let tglCetak = `${String(todayPDF.getDate()).padStart(2, '0')}/${String(todayPDF.getMonth() + 1).padStart(2, '0')}/${todayPDF.getFullYear()}`;
 
             const element = document.createElement('div');
             element.style.padding = '20px';
