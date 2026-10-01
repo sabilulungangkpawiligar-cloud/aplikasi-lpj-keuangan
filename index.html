@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Aplikasi LPJ Keuangan Kepanitiaan</title>
+    <title>Sistem Aplikasi LPJ</title>
     <link rel="icon" href="https://fav.farm/📊">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Library untuk Cetak PDF (html2pdf + Dependencies) -->
+   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+    <!-- Gunakan CDN xlsx-js-style agar properti cell.s (warna/style) bisa berfungsi -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -85,9 +87,9 @@
                         </button>
                         <!-- Section Selector -->
                         <div class="flex items-center gap-2">
-                            <label for="seksi-selector" class="text-sm font-medium text-gray-700 hidden sm:block">Pilih Komisi:</label>
+                            <label for="seksi-selector" class="text-sm font-medium text-gray-700 hidden sm:block">Pilih Panpel (Panitia Pelaksana):</label>
                             <select id="seksi-selector" onchange="changeSeksi(this.value)" class="w-full sm:w-64 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 shadow-sm transition-colors cursor-pointer">
-                                <option value="" disabled selected>-- Pilih Komisi/Seksi --</option>
+                                <option value="" disabled selected>-- Pilih Panpel (Panitia Pelaksana) --</option>
                             </select>
                         </div>
                     </div>
@@ -95,19 +97,16 @@
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
-            <!-- Empty State -->
             <div id="empty-state" class="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl shadow-sm border border-gray-100 h-full">
                 <div class="bg-blue-50 text-blue-500 p-4 rounded-full mb-4">
                     <i class="fas fa-hand-pointer text-4xl"></i>
                 </div>
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Belum Ada Komisi Terpilih</h2>
-                <p class="text-gray-500 max-w-md">Silakan pilih komisi (seksi) pada menu dropdown di bagian atas untuk mulai mengelola anggaran dan transaksi.</p>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Belum Ada Yang Terpilih</h2>
+                <p class="text-gray-500 max-w-md">Silakan pilih pada menu dropdown di bagian atas untuk mulai mengelola anggaran dan transaksi.</p>
             </div>
 
-            <!-- Dashboard Content -->
             <div id="dashboard-content" class="hidden flex-col gap-6">
                 
                 <!-- Section Title & Tabs -->
@@ -119,7 +118,6 @@
                         </div>
                     </div>
                     
-                    <!-- Tabs Navigation -->
                     <div class="flex overflow-x-auto">
                         <button onclick="switchTab('anggaran')" id="tab-btn-anggaran" class="flex-1 min-w-[120px] py-4 px-6 text-sm font-medium text-center tab-active transition-colors flex items-center justify-center gap-2">
                             <i class="fas fa-bullseye"></i> Anggaran
@@ -156,8 +154,7 @@
                                 <i class="fas fa-save mr-2 mt-0.5"></i> Simpan Anggaran
                             </button>
                         </div>
-                        
-                        <!-- Notification Toast -->
+                      
                         <div id="anggaran-toast" class="mt-4 p-4 bg-green-50 text-green-700 rounded-lg hidden flex items-center gap-3">
                             <i class="fas fa-check-circle"></i>
                             <span class="font-medium">Anggaran berhasil diperbarui.</span>
@@ -165,14 +162,13 @@
                     </div>
                 </div>
 
-                <!-- TAB CONTENT: TRANSAKSI -->
                 <div id="tab-content-transaksi" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in">
                     <div class="p-6 border-b border-gray-200 bg-gray-50">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                             <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                                 <i class="fas fa-plus-circle text-primary-600"></i> Tambah Transaksi Baru
                             </h3>
-                              <!-- Contoh Tombol di Navbar/Header Dashboard -->
+                            <!-- Contoh Tombol di Navbar/Header Dashboard -->
                             <button onclick="exportRekapGabunganToExcel()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -231,7 +227,6 @@
                     </div>
                 </div>
 
-                <!-- TAB CONTENT: LAPORAN -->
                 <div id="tab-content-laporan" class="hidden flex-col gap-6 animate-fade-in">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 border-l-4 border-l-blue-500">
@@ -297,38 +292,61 @@
         <!-- Footer -->
         <footer class="bg-white border-t border-gray-200 mt-auto">
             <div class="max-w-7xl mx-auto px-4 py-4 text-center text-sm text-gray-500">
-                &copy; <span id="current-year"></span> Sistem Aplikasi LPJ Keuangan. Data disimpan secara lokal di browser.
+                &copy; <span id="current-year"></span> Sistem Aplikasi LPJ. Data disimpan di Googl Drive dengan aman.
             </div>
         </footer>
     </div>
 
    <script>
-    // MASUKKAN URL WEB APP EXEC KAMU DI SINI
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwADCpmrYUfUY1fWPJA_Zl3Z6J0lkEUvtNNd-YbS0ou2PcbIfcT7h_tmDwNd7GzFdaI/exec";
+ 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyoZ31Fz1E2n3m9WuAaRve1QkAiiSEIo5LZIyboK6ln77uOw7rSIeRTLhiEPekR5_1c/exec";
 
-    const DAFTAR_SEKSI = [
-        "Seksi Acara", 
+   const DAFTAR_SEKSI = [
+"Seksi Acara", 
         "Seksi Dekorasi dan Perlengkapan", 
         "Seksi Publikasi dan Dokumentasi", 
         "SMKA", 
         "Seksi Konsumsi", 
         "Seksi Keamanan", 
         "Sekretariat", 
-        "Seksi Dana Usaha"
-    ];
+        "Seksi Dana Usaha"];
 
-    let appData = {};
-    let currentState = {
-        activeSeksi: null,
-        activeTab: 'anggaran'
-    };
+// 1. Ambil data dari LocalStorage jika ada, jika tidak ada baru gunakan {}
+let appData = JSON.parse(localStorage.getItem('appData_LPJ')) || {};
 
-    DAFTAR_SEKSI.forEach(seksi => {
+let currentState = {
+    activeSeksi: DAFTAR_SEKSI[0], // Set default ke seksi pertama agar tidak null
+    activeTab: 'anggaran'
+};
+
+// 2. Sinkronkan DAFTAR_SEKSI dengan appData secara instan
+DAFTAR_SEKSI.forEach(seksi => {
+    if (!appData[seksi]) {
         appData[seksi] = {
             anggaran: 0,
             transaksi: []
         };
+    }
+});
+
+// 3. Simpan kembali hasil sinkronisasi ke LocalStorage
+localStorage.setItem('appData_LPJ', JSON.stringify(appData));
+
+// 4. Fungsi mengisi Dropdown (Langsung dipanggil)
+function populateSeksiDropdown() {
+    const selectElem = document.getElementById("selectSeksi"); 
+    if (!selectElem) return;
+
+    selectElem.innerHTML = ""; // Bersihkan opsi lama
+
+    DAFTAR_SEKSI.forEach(seksi => {
+        const option = document.createElement("option");
+        option.value = seksi;
+        option.textContent = seksi;
+        selectElem.appendChild(option);
     });
+}
+   
 
     function formatRupiah(number) {
         if (number === 0) return 'Rp 0';
@@ -392,16 +410,37 @@
             .catch(err => console.error("Gagal mengambil data dari Google Sheets:", err));
     });
 
-    function changeSeksi(seksiName) {
-        if (!seksiName) return;
-        currentState.activeSeksi = seksiName;
-        
-        document.getElementById('empty-state').classList.add('hidden');
-        document.getElementById('dashboard-content').classList.remove('hidden');
-        document.getElementById('dashboard-content').classList.add('flex');
-        document.getElementById('active-seksi-title').textContent = seksiName;
-        switchTab('anggaran');
+   function changeSeksi(seksiName) {
+    if (!seksiName) return;
+    
+    // 1. Set seksi aktif
+    currentState.activeSeksi = seksiName;
+    
+    // 2. PASTI-KAN appData untuk seksi ini sudah ada (mencegah Uncaught TypeError)
+    if (!appData[seksiName]) {
+        appData[seksiName] = {
+            anggaran: 0,
+            transaksi: []
+        };
+        // Simpan ke localStorage agar konsisten
+        localStorage.setItem('appData_LPJ', JSON.stringify(appData));
     }
+    
+    // 3. Tampilkan elemen UI
+    const emptyState = document.getElementById('empty-state');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const activeSeksiTitle = document.getElementById('active-seksi-title');
+
+    if (emptyState) emptyState.classList.add('hidden');
+    if (dashboardContent) {
+        dashboardContent.classList.remove('hidden');
+        dashboardContent.classList.add('flex');
+    }
+    if (activeSeksiTitle) activeSeksiTitle.textContent = seksiName;
+    
+    // 4. Pindah ke tab anggaran (sekarang aman karena appData[seksiName] sudah pasti ada)
+    switchTab('anggaran');
+}
 
     function switchTab(tabName) {
         currentState.activeTab = tabName;
@@ -434,7 +473,7 @@
         if (tabName === 'laporan') renderLaporan();
     }
 
-     function renderAnggaran() {
+   function renderAnggaran() {
     const seksi = currentState.activeSeksi;
     
     // Validasi: Jika seksi belum dipilih/tidak valid
@@ -511,55 +550,59 @@
         inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
     }
 }
-    function renderTransaksi() {
-        const seksi = currentState.activeSeksi;
-        const tbody = document.getElementById('tabel-transaksi-body');
-        const transaksiList = appData[seksi].transaksi;
-        
-        tbody.innerHTML = ''; 
-        
-        if (transaksiList.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
-                        Belum ada transaksi tercatat.
-                    </td>
-                </tr>
-            `;
-            return;
-        }
 
-        const sortedList = [...transaksiList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
-        sortedList.forEach((trx, index) => {
-            const tr = document.createElement('tr');
-            tr.className = "bg-white border-b hover:bg-gray-50 transition-colors";
-            
-            const tgl = new Date(trx.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
-            
-            let inHtml = trx.jenis === 'pemasukan' ? `<span class="text-green-600 font-medium">+ ${formatRupiah(trx.nominal)}</span>` : '-';
-            let outHtml = trx.jenis === 'pengeluaran' ? `<span class="text-red-600 font-medium">- ${formatRupiah(trx.nominal)}</span>` : '-';
-
-            tr.innerHTML = `
-                <td class="px-6 py-4 text-center font-medium">${index + 1}</td>
-                <td class="px-6 py-4 whitespace-nowrap">${tgl}</td>
-                <td class="px-6 py-4">
-                    <div class="font-medium text-gray-900">${trx.keterangan}</div>
-                    <div class="text-xs text-gray-500 capitalize mt-0.5 inline-block px-2 py-0.5 rounded-full ${trx.jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${trx.jenis}</div>
+   function renderTransaksi() {
+    const seksi = currentState.activeSeksi;
+    const tbody = document.getElementById('tabel-transaksi-body');
+    const transaksiList = appData[seksi].transaksi;
+    
+    tbody.innerHTML = ''; 
+    
+    if (transaksiList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
+                    Belum ada transaksi tercatat.
                 </td>
-                <td class="px-6 py-4 text-right">${inHtml}</td>
-                <td class="px-6 py-4 text-right">${outHtml}</td>
-                <td class="px-6 py-4 text-center">
-                    <button onclick="hapusTransaksi('${trx.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Hapus">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+            </tr>
+        `;
+        return;
     }
 
-    function handleFormSubmit(event) {
+    const sortedList = [...transaksiList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+    sortedList.forEach((trx, index) => {
+        const tr = document.createElement('tr');
+        tr.className = "bg-white border-b hover:bg-gray-50 transition-colors";
+        
+        // Ambil hanya YYYY-MM-DD
+        const rawDate = trx.tanggal ? trx.tanggal.split('T')[0] : '';
+        const parts = rawDate.split('-');
+        const tglClean = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : rawDate;
+        
+        let inHtml = trx.jenis === 'pemasukan' ? `<span class="text-green-600 font-medium">+ ${formatRupiah(trx.nominal)}</span>` : '-';
+        let outHtml = trx.jenis === 'pengeluaran' ? `<span class="text-red-600 font-medium">- ${formatRupiah(trx.nominal)}</span>` : '-';
+
+        tr.innerHTML = `
+            <td class="px-6 py-4 text-center font-medium">${index + 1}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${tglClean}</td>
+            <td class="px-6 py-4">
+                <div class="font-medium text-gray-900">${trx.keterangan}</div>
+                <div class="text-xs text-gray-500 capitalize mt-0.5 inline-block px-2 py-0.5 rounded-full ${trx.jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${trx.jenis}</div>
+            </td>
+            <td class="px-6 py-4 text-right">${inHtml}</td>
+            <td class="px-6 py-4 text-right">${outHtml}</td>
+            <td class="px-6 py-4 text-center">
+                <button onclick="hapusTransaksi('${trx.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Hapus">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+       
+       function handleFormSubmit(event) {
         event.preventDefault(); 
         
         const seksi = currentState.activeSeksi;
@@ -752,12 +795,12 @@
 
                 <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 12px; text-align: center;">
                     <div style="width: 40%;">
-                        <p>Mengetahui,<br><b>Ketua Panitia</b></p>
+                        <p>Mengetahui,<br><b>Ketua RT 010/025</b></p>
                         <br><br><br>
                         <p>( _______________________ )</p>
                     </div>
                     <div style="width: 40%;">
-                        <p>Dibuat oleh,<br><b>Bendahara Panitia</b></p>
+                        <p>Dibuat oleh,<br><b>Ketua Panitia</b></p>
                         <br><br><br>
                         <p>( _______________________ )</p>
                     </div>
@@ -779,38 +822,246 @@
             }
         }
        
-    function exportExcel() {
-        const seksi = currentState.activeSeksi;
-        if (!seksi) return;
-
-        const dataSeksi = appData[seksi];
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-        csvContent += "No;Tanggal;Keterangan;Pemasukan;Pengeluaran;Sisa Saldo\r\n";
-        let runningSaldo = 0;
-        const sortedList = [...dataSeksi.transaksi].sort((a, b) => new Date(a.tanggal) - new Date(a.tanggal));
-
-        sortedList.forEach((trx, index) => {
-            let pemasukan = trx.jenis === 'pemasukan' ? trx.nominal : 0;
-            let pengeluaran = trx.jenis === 'pengeluaran' ? trx.nominal : 0;
-            
-            runningSaldo += pemasukan;
-            runningSaldo -= pengeluaran;
-            let ket = `"${trx.keterangan.replace(/"/g, '""')}"`;
-            
-            csvContent += `${index + 1};${trx.tanggal};${ket};${pemasukan};${pengeluaran};${runningSaldo}\r\n`;
-        });
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        const safeSeksiName = seksi.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        const dateNow = new Date().toISOString().split('T')[0];
-        link.setAttribute("download", `Laporan_Transaksi_${safeSeksiName}_${dateNow}.csv`);
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+ // 1. TAMPILAN TABEL TRANSAKSI (Memastikan Format Tanggal Bersih Tanpa Jam/WIB)
+function renderTransaksi() {
+    const seksi = currentState.activeSeksi;
+    const tbody = document.getElementById('tabel-transaksi-body');
+    const transaksiList = appData[seksi].transaksi;
+    
+    tbody.innerHTML = ''; 
+    
+    if (transaksiList.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
+                    Belum ada transaksi tercatat.
+                </td>
+            </tr>
+        `;
+        return;
     }
-       function exportRekapGabunganToExcel() {
+
+    const sortedList = [...transaksiList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+    sortedList.forEach((trx, index) => {
+        const tr = document.createElement('tr');
+        tr.className = "bg-white border-b hover:bg-gray-50 transition-colors";
+        
+        // Ambil hanya YYYY-MM-DD
+        const rawDate = trx.tanggal ? trx.tanggal.split('T')[0] : '';
+        const parts = rawDate.split('-');
+        const tglClean = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : rawDate;
+        
+        let inHtml = trx.jenis === 'pemasukan' ? `<span class="text-green-600 font-medium">+ ${formatRupiah(trx.nominal)}</span>` : '-';
+        let outHtml = trx.jenis === 'pengeluaran' ? `<span class="text-red-600 font-medium">- ${formatRupiah(trx.nominal)}</span>` : '-';
+
+        tr.innerHTML = `
+            <td class="px-6 py-4 text-center font-medium">${index + 1}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${tglClean}</td>
+            <td class="px-6 py-4">
+                <div class="font-medium text-gray-900">${trx.keterangan}</div>
+                <div class="text-xs text-gray-500 capitalize mt-0.5 inline-block px-2 py-0.5 rounded-full ${trx.jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${trx.jenis}</div>
+            </td>
+            <td class="px-6 py-4 text-right">${inHtml}</td>
+            <td class="px-6 py-4 text-right">${outHtml}</td>
+            <td class="px-6 py-4 text-center">
+                <button onclick="hapusTransaksi('${trx.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Hapus">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function applyExcelStylesRT(worksheet, rows) {
+    const border = {
+        top: { style: "medium", color: { rgb: "000000" } },
+        bottom: { style: "medium", color: { rgb: "000000" } },
+        left: { style: "medium", color: { rgb: "000000" } },
+        right: { style: "medium", color: { rgb: "000000" } }
+    };
+
+    const thinBorder = {
+        top: { style: "thin", color: { rgb: "000000" } },
+        bottom: { style: "thin", color: { rgb: "000000" } },
+        left: { style: "thin", color: { rgb: "000000" } },
+        right: { style: "thin", color: { rgb: "000000" } }
+    };
+
+    const titleStyle = {
+        font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "13402D" } }, // Hijau Botol Utama
+        alignment: { horizontal: "center", vertical: "center" },
+        border
+    };
+
+    const headerStyle = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "1F4E3D" } }, // Hijau Botol Header
+        alignment: { horizontal: "center", vertical: "center", wrapText: true },
+        border
+    };
+
+    const bodyStyle = {
+        border: thinBorder,
+        alignment: { vertical: "center", wrapText: true }
+    };
+
+    const footerStyle = {
+        font: { italic: true, color: { rgb: "666666" }, sz: 9 },
+        alignment: { vertical: "center" }
+    };
+
+    const signStyle = {
+        font: { bold: true },
+        alignment: { horizontal: "center", vertical: "center" }
+    };
+
+    const range = XLSX.utils.decode_range(worksheet["!ref"]);
+    const lastRowIdx = rows.length - 1;
+    const signStartIdx = lastRowIdx - 6; // Indeks awal tanda tangan
+
+    for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+            const address = XLSX.utils.encode_cell({ r: row, c: col });
+            let cell = worksheet[address];
+
+            if (!cell) {
+                cell = { t: 's', v: '' };
+                worksheet[address] = cell;
+            }
+
+            if (row === 0) {
+                cell.s = titleStyle;
+            } else if (row === 2) {
+                cell.s = headerStyle;
+            } else if (row >= 3 && row < signStartIdx - 1) { // Hanya baris data transaksi
+                cell.s = { ...bodyStyle };
+
+               
+                if ([4, 5].includes(col)) {
+                    cell.z = "#,##0";
+                    cell.s.alignment = { horizontal: "right", vertical: "center" };
+                }
+
+                
+                if ([0, 1, 2].includes(col)) {
+                    cell.s.alignment = { horizontal: "center", vertical: "center" };
+                }
+            } else if (row === lastRowIdx) {
+                cell.s = footerStyle;
+            } else if (row >= signStartIdx) {
+                
+                cell.s = {
+                    font: { bold: row === signStartIdx + 1 }, // Cetak tebal untuk Ketua Panitia & Ketua RT
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            }
+        }
+    }
+
+    // Merge Cell yang Presisi
+    worksheet["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Judul Utama
+        { s: { r: lastRowIdx, c: 0 }, e: { r: lastRowIdx, c: 5 } }, // Footnote
+
+        // Merge "Disusun oleh," (Kolom B-C) & "Mengetahui," (Kolom E-F)
+        { s: { r: signStartIdx, c: 1 }, e: { r: signStartIdx, c: 2 } },
+        { s: { r: signStartIdx, c: 4 }, e: { r: signStartIdx, c: 5 } },
+
+        // Merge "Ketua Panitia" & "Ketua RT 10/25"
+        { s: { r: signStartIdx + 1, c: 1 }, e: { r: signStartIdx + 1, c: 2 } },
+        { s: { r: signStartIdx + 1, c: 4 }, e: { r: signStartIdx + 1, c: 5 } },
+
+        { s: { r: signStartIdx + 4, c: 1 }, e: { r: signStartIdx + 4, c: 2 } },
+        { s: { r: signStartIdx + 4, c: 4 }, e: { r: signStartIdx + 4, c: 5 } }
+    ];
+
+    worksheet["!cols"] = [
+        { wch: 6 },  // NO
+        { wch: 14 }, // TANGGAL
+        { wch: 15 }, // JENIS
+        { wch: 40 }, // KETERANGAN
+        { wch: 20 }, // PEMASUKAN
+        { wch: 20 }  // PENGELUARAN
+    ];
+
+    worksheet["!autofilter"] = {
+        ref: `A3:F${signStartIdx - 2}`
+    };
+}
+
+function exportExcel() {
+    const seksi = currentState.activeSeksi;
+    if (!seksi) {
+        alert("Silakan pilih seksi terlebih dahulu.");
+        return;
+    }
+
+    const dataSeksi = appData[seksi];
+    const transaksiList = dataSeksi ? (dataSeksi.transaksi || []) : [];
+
+    const today = new Date();
+    const tglCetak = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+
+    const excelData = [
+        [`PENGAJUAN PENGGUNAAN DANA - ${seksi.toUpperCase()}`], // Row 0
+        [], // Row 1
+        ["NO", "TANGGAL", "JENIS", "KETERANGAN / RINCIAN", "PEMASUKAN (Rp)", "PENGELUARAN (Rp)"] // Row 2
+    ];
+
+    transaksiList.forEach((trx, index) => {
+        const rawDate = trx.tanggal ? trx.tanggal.split('T')[0] : '';
+        const parts = rawDate.split('-');
+        const tglClean = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : rawDate;
+
+        excelData.push([
+            index + 1,
+            tglClean,
+            trx.jenis ? trx.jenis.toUpperCase() : '',
+            trx.keterangan || '',
+            trx.jenis === 'pemasukan' ? trx.nominal : 0,
+            trx.jenis === 'pengeluaran' ? trx.nominal : 0
+        ]);
+    });
+
+    excelData.push([]); // Spasi
+    
+   let rowSign1 = new Array(6).fill("");
+    rowSign1[1] = "Disusun oleh,";
+    rowSign1[4] = "Mengetahui,";
+    excelData.push(rowSign1);
+
+    let rowSignSub = new Array(6).fill("");
+    rowSignSub[1] = "Ketua Panitia";
+    rowSignSub[4] = "Ketua RT 10/25";
+    excelData.push(rowSignSub);
+
+    excelData.push(new Array(6).fill(""));
+    excelData.push(new Array(6).fill(""));
+
+    let rowSign2 = new Array(6).fill("");
+    rowSign2[1] = "( ___________________ )";
+    rowSign2[4] = "( ___________________ )";
+    excelData.push(rowSign2);
+
+    excelData.push([]); // Spasi
+    excelData.push([`* Berkas sah digunakan sebagai bukti fisik penggunaan anggaran. Dicetak otomatis pada tanggal: ${tglCetak}`]);
+    
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    
+    applyExcelStylesRT(ws, excelData);
+
+    const wb = XLSX.utils.book_new();
+    const sheetName = seksi.replace(/[\\/*?:\[\]]/g, "").trim().substring(0, 30) || "LPJ";
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+    const fileName = `LPJ_Keuangan_${seksi.replace(/\s+/g, '_')}_${tglCetak.replace(/\//g, '-')}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    }
+
+function exportRekapGabunganToExcel() {
     const today = new Date();
     const tglCetak = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
     const wb = XLSX.utils.book_new();
@@ -988,6 +1239,6 @@
     XLSX.writeFile(wb, fileName);
 }
 
-</script>
-</body>
+   </script>
+ </body>
 </html>
