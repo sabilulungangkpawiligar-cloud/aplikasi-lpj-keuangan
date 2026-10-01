@@ -427,48 +427,83 @@
         if (tabName === 'laporan') renderLaporan();
     }
 
-    function renderAnggaran() {
-        const seksi = currentState.activeSeksi;
-        const currentAnggaran = appData[seksi].anggaran;
-        const inputEl = document.getElementById('input-anggaran');
-        
-        if (currentAnggaran > 0) {
-            inputEl.value = new Intl.NumberFormat('id-ID').format(currentAnggaran);
-        } else {
-            inputEl.value = '';
-        }
+     function renderAnggaran() {
+    const seksi = currentState.activeSeksi;
+    
+    // Validasi: Jika seksi belum dipilih/tidak valid
+    if (!seksi) return;
+
+    // Mencegah error 'Cannot read properties of undefined (reading anggaran)'
+    if (!appData[seksi]) {
+        appData[seksi] = { anggaran: 0, transaksi: [] };
     }
 
-    function saveAnggaran() {
-        const seksi = currentState.activeSeksi;
-        const inputEl = document.getElementById('input-anggaran');
-        const nominal = unformatRupiah(inputEl.value);
-        
-        appData[seksi].anggaran = nominal;
+    const nominalAnggaran = appData[seksi].anggaran || 0;
+    
+    // Tampilkan nominal anggaran ke elemen HTML kamu (sesuaikan ID jika berbeda)
+    const displayElem = document.getElementById("displayAnggaran");
+    if (displayElem) {
+        displayElem.innerText = nominalAnggaran.toLocaleString('id-ID');
+    }
 
-        // Kirim ke Google Sheets via fetch API
-        fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "saveAnggaran",
-                seksi: seksi,
-                nominal: nominal
-            })
-        }).then(() => {
-            const toast = document.getElementById('anggaran-toast');
+    const inputElem = document.getElementById("inputAnggaran");
+    if (inputElem) {
+        inputElem.value = nominalAnggaran;
+    }
+}
+
+   function saveAnggaran() {
+    const seksi = currentState.activeSeksi;
+    
+    // Validasi: Cegah jalankan fungsi jika belum ada seksi yang dipilih
+    if (!seksi) {
+        alert("Silakan pilih seksi/panpel terlebih dahulu.");
+        return;
+    }
+
+    const inputEl = document.getElementById('input-anggaran');
+    if (!inputEl) return;
+
+    const nominal = unformatRupiah(inputEl.value);
+    
+    // Mencegah error 'Cannot set properties of undefined (setting anggaran)'
+    if (!appData[seksi]) {
+        appData[seksi] = { anggaran: 0, transaksi: [] };
+    }
+
+    // Simpan nominal anggaran di objek lokal
+    appData[seksi].anggaran = nominal;
+
+    // Simpan ke LocalStorage agar data tidak hilang saat refresh
+    localStorage.setItem('appData_LPJ', JSON.stringify(appData));
+
+    // Kirim ke Google Sheets via fetch API
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "saveAnggaran",
+            seksi: seksi,
+            nominal: nominal
+        })
+    }).then(() => {
+        const toast = document.getElementById('anggaran-toast');
+        if (toast) {
             toast.classList.remove('hidden');
             setTimeout(() => {
                 toast.classList.add('hidden');
             }, 3000);
-        });
-        
-        if(nominal > 0) { 
-            inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
         }
+    }).catch(err => {
+        console.error("Gagal mengirim data ke Google Sheets:", err);
+    });
+    
+    // Format ulang angka pada input
+    if (nominal > 0) { 
+        inputEl.value = new Intl.NumberFormat('id-ID').format(nominal);
     }
-
+}
     function renderTransaksi() {
         const seksi = currentState.activeSeksi;
         const tbody = document.getElementById('tabel-transaksi-body');
