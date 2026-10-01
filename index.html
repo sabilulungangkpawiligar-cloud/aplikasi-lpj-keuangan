@@ -970,7 +970,7 @@ function applyExcelStylesRT(worksheet, rows) {
         { s: { r: signStartIdx, c: 1 }, e: { r: signStartIdx, c: 2 } },
         { s: { r: signStartIdx, c: 4 }, e: { r: signStartIdx, c: 5 } },
 
-        // Merge "Ketua Panitia" & "Ketua RT 10/25"
+        // Merge "Ketua Panitia" & "Ketua Panitia"
         { s: { r: signStartIdx + 1, c: 1 }, e: { r: signStartIdx + 1, c: 2 } },
         { s: { r: signStartIdx + 1, c: 4 }, e: { r: signStartIdx + 1, c: 5 } },
 
@@ -1034,8 +1034,8 @@ function exportExcel() {
     excelData.push(rowSign1);
 
     let rowSignSub = new Array(6).fill("");
-    rowSignSub[1] = "Ketua Panitia";
-    rowSignSub[4] = "Ketua RT 10/25";
+    rowSignSub[1] = "Sekretaris";
+    rowSignSub[4] = "Ketua Panitia";
     excelData.push(rowSignSub);
 
     excelData.push(new Array(6).fill(""));
