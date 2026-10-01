@@ -993,7 +993,22 @@ function applyExcelStylesRT(worksheet, rows) {
         ref: `A3:F${signStartIdx - 2}`
     };
 }
-
+function formatTanggalClean(inputTanggal) {
+    if (!inputTanggal) return "-";
+    
+    // Ubah input ke Objek Date agar pasti bisa diolah
+    const d = (inputTanggal instanceof Date) ? inputTanggal : new Date(inputTanggal);
+    
+    // Jika format tanggal valid, ambil Day/Month/Year
+    if (!isNaN(d.getTime())) {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+    
+    return String(inputTanggal);
+}
 function exportExcel() {
     const seksi = currentState.activeSeksi;
     if (!seksi) {
